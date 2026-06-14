@@ -234,7 +234,7 @@ export default function App() {
         )}
 
         <footer className="app-footer">
-          Wavelength uses Spotify catalog and AI mood analysis. Previews are 30 seconds.
+          Wavelength uses Deezer catalog and AI mood analysis. Previews are 30 seconds.
         </footer>
       </main>
     </div>

@@ -7,8 +7,8 @@
 }
 
 :root {
-  --bg: #121212;
-  --bg-card: #181818;
+  --bg: #0d0b1a;
+  --bg-card: #13112a;
   --bg-hover: #282828;
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
@@ -18,7 +18,7 @@
 }
 
 body {
-  background: var(--bg);
+  background: radial-gradient(ellipse at top, #1a1035 0%, #0d0b1a 60%);
   color: var(--text-primary);
   font-family: Inter, Circular, sans-serif;
   overflow-x: hidden;
@@ -26,7 +26,7 @@ body {
 
 .app {
   min-height: 100vh;
-  background: var(--bg);
+  background: radial-gradient(ellipse at top, #1a1035 0%, #0d0b1a 60%);
   color: var(--text-primary);
 }
 
@@ -39,7 +39,7 @@ body {
 .app-header {
   position: sticky;
   top: 0;
-  background: rgba(18, 18, 18, 0.98);
+  background: rgba(13, 11, 26, 0.95);
   backdrop-filter: blur(8px);
   z-index: 100;
   padding: 1rem 0;
@@ -53,6 +53,7 @@ body {
   font-weight: 700;
   color: var(--accent-purple);
   letter-spacing: -0.5px;
+  text-shadow: 0 0 40px rgba(167, 139, 250, 0.4);
 }
 
 .app-tagline {
@@ -70,7 +71,7 @@ body {
 
 .spotify-card:hover {
   background: var(--bg-hover);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.12);
 }
 
 .loading {
@@ -149,8 +150,8 @@ body {
 }
 
 .tracks-heading {
-  margin: 0 0 0.75rem;
-  font-size: 1.375rem;
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
 }

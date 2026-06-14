@@ -33,20 +33,14 @@ export default function MoodInput({ onSubmit, loading }) {
         }
         .mood-input__header {
           text-align: center;
-          margin-bottom: 40px;
           max-width: 560px;
         }
-        .mood-input__title {
-          margin: 0 0 12px;
-          font-size: 2rem;
-          font-weight: 700;
-          color: #a78bfa;
-          letter-spacing: -0.02em;
-        }
         .mood-input__subtitle {
-          margin: 0;
-          font-size: 1.125rem;
-          color: #b3b3b3;
+          margin: 0 0 2rem;
+          font-size: 2rem;
+          font-weight: 300;
+          color: #ffffff;
+          text-align: center;
         }
         .mood-input__form {
           width: 100%;
@@ -59,16 +53,18 @@ export default function MoodInput({ onSubmit, loading }) {
           font-size: 16px;
           line-height: 1.5;
           color: #ffffff;
-          background: #181818;
-          border: none;
+          background: #13112a;
+          border: 1px solid transparent;
+          background-clip: padding-box;
           border-radius: 8px;
           resize: vertical;
           outline: none;
           font-family: inherit;
           transition: box-shadow 0.2s ease;
+          box-shadow: 0 0 0 1px #2e2e3a, 0 0 20px rgba(167, 139, 250, 0.05);
         }
         .mood-input__textarea:focus {
-          box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5);
+          box-shadow: 0 0 0 1px #2e2e3a, 0 0 20px rgba(167, 139, 250, 0.15);
         }
         .mood-input__textarea::placeholder {
           color: #b3b3b3;
@@ -78,17 +74,17 @@ export default function MoodInput({ onSubmit, loading }) {
           margin-top: 16px;
           padding: 14px 24px;
           font-size: 16px;
-          font-weight: 700;
+          font-weight: 600;
           color: #ffffff;
-          background: #a78bfa;
+          background: linear-gradient(135deg, #a78bfa, #7c3aed);
           border: none;
           border-radius: 50px;
           cursor: pointer;
           font-family: inherit;
-          transition: opacity 0.2s ease, transform 0.15s ease;
+          transition: box-shadow 0.2s ease, transform 0.15s ease;
         }
         .mood-input__submit:hover:not(:disabled) {
-          opacity: 0.92;
+          box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
           transform: scale(1.01);
         }
         .mood-input__submit:disabled {
@@ -99,12 +95,13 @@ export default function MoodInput({ onSubmit, loading }) {
         .mood-input__pills {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 0.5rem;
+          justify-content: center;
           margin-top: 24px;
         }
         .mood-input__pill {
-          padding: 10px 16px;
-          font-size: 13px;
+          padding: 0.4rem 1rem;
+          font-size: 0.8rem;
           line-height: 1.4;
           color: #ffffff;
           background: #282828;
@@ -112,8 +109,9 @@ export default function MoodInput({ onSubmit, loading }) {
           border-radius: 50px;
           cursor: pointer;
           font-family: inherit;
-          text-align: left;
+          text-align: center;
           transition: background 0.2s ease;
+          white-space: nowrap;
         }
         .mood-input__pill:hover {
           background: #3e3e3e;
@@ -121,7 +119,6 @@ export default function MoodInput({ onSubmit, loading }) {
       `}</style>
 
       <header className="mood-input__header">
-        <h1 className="mood-input__title">Wavelength</h1>
         <p className="mood-input__subtitle">How are you feeling right now?</p>
       </header>
 

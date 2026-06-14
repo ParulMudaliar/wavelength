@@ -68,7 +68,7 @@ export default function TrackCard({
   }
 
   return (
-    <div className="track-card spotify-card">
+    <div className="track-card">
       <style>{`
         .track-card {
           display: flex;
@@ -76,6 +76,14 @@ export default function TrackCard({
           gap: 1rem;
           padding: 0.75rem;
           font-family: Inter, Circular, sans-serif;
+          background: #13112a;
+          border: none;
+          border-left: 3px solid #a78bfa;
+          border-radius: 8px;
+          transition: box-shadow 0.2s ease;
+        }
+        .track-card:hover {
+          box-shadow: 0 4px 24px rgba(167, 139, 250, 0.12);
         }
         .track-card__art {
           border-radius: 4px;
@@ -83,8 +91,8 @@ export default function TrackCard({
           object-fit: cover;
         }
         .track-card__art-placeholder {
-          width: 64px;
-          height: 64px;
+          width: 72px;
+          height: 72px;
           border-radius: 4px;
           flex-shrink: 0;
           background: #282828;
@@ -181,8 +189,8 @@ export default function TrackCard({
           className="track-card__art"
           src={albumArt}
           alt=""
-          width={64}
-          height={64}
+          width={72}
+          height={72}
         />
       ) : (
         <div className="track-card__art-placeholder" />

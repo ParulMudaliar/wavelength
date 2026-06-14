@@ -1,3 +1,10 @@
+const PATH_EMOJIS = {
+  'Sit With It': '🌊',
+  Recover: '🌱',
+  Reframe: '🔮',
+  Escape: '🚀',
+}
+
 export default function JourneyPaths({ paths, onSelect }) {
   return (
     <div className="journey-paths">
@@ -30,10 +37,11 @@ export default function JourneyPaths({ paths, onSelect }) {
           }
         }
         .journey-card {
-          background: #181818;
+          background: #13112a;
           border: none;
           border-radius: 8px;
-          padding: 1.25rem;
+          min-height: 140px;
+          padding: 1.5rem 1.25rem;
           cursor: pointer;
           text-align: left;
           font-family: inherit;
@@ -41,13 +49,13 @@ export default function JourneyPaths({ paths, onSelect }) {
         }
         .journey-card:hover {
           background: #282828;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 24px rgba(167, 139, 250, 0.12);
         }
         .journey-card--featured {
           box-shadow: 0 0 0 1px #a78bfa;
         }
         .journey-card--featured:hover {
-          box-shadow: 0 0 0 1px #a78bfa, 0 4px 16px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 0 0 1px #a78bfa, 0 4px 24px rgba(167, 139, 250, 0.12);
         }
         .journey-card__label {
           font-weight: 700;
@@ -75,7 +83,10 @@ export default function JourneyPaths({ paths, onSelect }) {
             className={`journey-card${path.label === 'Sit With It' ? ' journey-card--featured' : ''}`}
             onClick={() => onSelect(path)}
           >
-            <div className="journey-card__label">{path.label}</div>
+            <div className="journey-card__label">
+              {PATH_EMOJIS[path.label] ? `${PATH_EMOJIS[path.label]} ` : ''}
+              {path.label}
+            </div>
             <div className="journey-card__description">{path.description}</div>
           </button>
         ))}
