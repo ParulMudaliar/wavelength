@@ -1,137 +1,226 @@
-import { useState } from 'react'
-import posthog from 'posthog-js'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useMemo, useState } from 'react'
+import MoodInput from './components/MoodInput'
+import MoodGenome from './components/MoodGenome'
+import JourneyPaths from './components/JourneyPaths'
+import TrackCard from './components/TrackCard'
+import JourneyReflection from './components/JourneyReflection'
+import { parseMood } from './lib/moodParser'
+import { searchTracksForMood } from './lib/spotify'
+import {
+  trackMoodSearch,
+  trackJourneySelected,
+  trackTrackPreview,
+  trackSpotifyOpen,
+  trackJourneyReflection,
+} from './lib/analytics'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  function handleCounterClick() {
-    const newCount = count + 1
-    setCount(newCount)
-    posthog.capture('counter_incremented', { count: newCount })
-  }
-
-  function handleDocLinkClick(link) {
-    posthog.capture('documentation_link_clicked', { link })
-  }
-
-  function handleCommunityLinkClick(platform) {
-    posthog.capture('community_link_clicked', { platform })
-  }
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={handleCounterClick}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank" onClick={() => handleDocLinkClick('vite')}>
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank" onClick={() => handleDocLinkClick('react')}>
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank" onClick={() => handleCommunityLinkClick('github')}>
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank" onClick={() => handleCommunityLinkClick('discord')}>
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank" onClick={() => handleCommunityLinkClick('x')}>
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank" onClick={() => handleCommunityLinkClick('bluesky')}>
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function formatGenomeLabel(key) {
+  return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-export default App
+function getWhyItMatches(genome) {
+  return Object.entries(genome)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 2)
+    .map(([key]) => formatGenomeLabel(key))
+}
+
+const initialState = {
+  step: 'input',
+  moodText: '',
+  parsedMood: null,
+  selectedPath: null,
+  tracks: [],
+  loading: false,
+  error: '',
+}
+
+export default function App() {
+  const [step, setStep] = useState(initialState.step)
+  const [moodText, setMoodText] = useState(initialState.moodText)
+  const [parsedMood, setParsedMood] = useState(initialState.parsedMood)
+  const [selectedPath, setSelectedPath] = useState(initialState.selectedPath)
+  const [tracks, setTracks] = useState(initialState.tracks)
+  const [loading, setLoading] = useState(initialState.loading)
+  const [error, setError] = useState(initialState.error)
+
+  const whyItMatches = useMemo(
+    () => (parsedMood?.moodGenome ? getWhyItMatches(parsedMood.moodGenome) : []),
+    [parsedMood],
+  )
+
+  const trackScores = useMemo(() => {
+    if (!parsedMood || tracks.length === 0) return {}
+    return Object.fromEntries(
+      tracks.map((track) => [
+        track.id,
+        parsedMood.wavelengthScore + Math.floor(Math.random() * 11) - 5,
+      ]),
+    )
+  }, [tracks, parsedMood])
+
+  async function handleMoodSubmit(text) {
+    setMoodText(text)
+    setLoading(true)
+    setError('')
+    trackMoodSearch(text)
+
+    try {
+      const result = await parseMood(text)
+      setParsedMood(result)
+      setStep('paths')
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handlePathSelect(path) {
+    trackJourneySelected(path.label)
+    setSelectedPath(path)
+    setLoading(true)
+    setError('')
+
+    try {
+      const results = await searchTracksForMood(path.searchQuery, 10)
+      setTracks(results)
+      setStep('tracks')
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleReflection(outcome, shift) {
+    trackJourneyReflection(outcome, shift)
+  }
+
+  function resetApp() {
+    setStep(initialState.step)
+    setMoodText(initialState.moodText)
+    setParsedMood(initialState.parsedMood)
+    setSelectedPath(initialState.selectedPath)
+    setTracks(initialState.tracks)
+    setLoading(initialState.loading)
+    setError(initialState.error)
+  }
+
+  const loadingMessage =
+    step === 'input'
+      ? 'Reading your emotional fingerprint...'
+      : 'Building your journey...'
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [step])
+
+  function handleReflectionTryAgain() {
+    setStep('paths')
+    setTracks([])
+  }
+
+  const hasEnoughTracks = tracks.length >= 1
+
+  return (
+    <div className="app">
+      <header className="app-header">
+        <div className="app-logo">Wavelength</div>
+        <div className="app-tagline">Emotional Navigation for Music</div>
+      </header>
+
+      <main className="app-container">
+        {error && (
+          <div className="error-state">
+            <span>{error}</span>
+            <button type="button" className="error-retry-btn" onClick={() => setError('')}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {loading && <p className="loading">{loadingMessage}</p>}
+
+        {step === 'input' && (
+          <MoodInput onSubmit={handleMoodSubmit} loading={loading} />
+        )}
+
+        {step === 'paths' && !loading && parsedMood && (
+          <div className="paths-container">
+            <JourneyPaths
+              paths={parsedMood.journeyPaths}
+              onSelect={handlePathSelect}
+            />
+            <MoodGenome
+              genome={parsedMood.moodGenome}
+              currentState={parsedMood.currentState}
+            />
+          </div>
+        )}
+
+        {step === 'tracks' && selectedPath && parsedMood && (
+          <div className="tracks-container">
+            <h2 className="tracks-heading">{selectedPath.label}</h2>
+
+            <div className="journey-arc">
+              <span>{parsedMood.currentState}</span>
+              <span className="journey-arc-arrow" aria-hidden="true">
+                →
+              </span>
+              <span>{selectedPath.label}</span>
+            </div>
+
+            {!hasEnoughTracks ? (
+              <div className="tracks-empty">
+                <p>
+                  We could not find enough tracks for this journey. Try a different path
+                  or describe your mood differently.
+                </p>
+                <button
+                  type="button"
+                  className="start-over-btn"
+                  onClick={handleReflectionTryAgain}
+                >
+                  Try a different path
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="tracks-section">
+                  {tracks.map((track) => {
+                    const artistName = track.artists?.map((a) => a.name).join(', ') ?? ''
+                    return (
+                      <TrackCard
+                        key={track.id}
+                        track={track}
+                        wavelengthScore={trackScores[track.id]}
+                        whyItMatches={whyItMatches}
+                        onPreview={() => trackTrackPreview(track.name, artistName)}
+                        onSpotifyOpen={() => trackSpotifyOpen(track.name, artistName)}
+                      />
+                    )
+                  })}
+                </div>
+
+                <JourneyReflection
+                  onReflection={handleReflection}
+                  onTryAgain={handleReflectionTryAgain}
+                />
+              </>
+            )}
+
+            <button type="button" className="start-over-btn" onClick={resetApp}>
+              Start a new journey
+            </button>
+          </div>
+        )}
+
+        <footer className="app-footer">
+          Wavelength uses Spotify catalog and AI mood analysis. Previews are 30 seconds.
+        </footer>
+      </main>
+    </div>
+  )
+}
