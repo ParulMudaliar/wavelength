@@ -19,8 +19,21 @@ function formatGenomeLabel(key) {
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-function getWhyItMatches(genome) {
+const PATH_DIMENSIONS = {
+  Escape: ['energy', 'wonder'],
+  Recover: ['hope', 'warmth'],
+  'Sit With It': ['nostalgia', 'loneliness'],
+  Reframe: ['confidence', 'hope'],
+}
+
+function getWhyItMatches(genome, pathLabel) {
+  const pathKeys = PATH_DIMENSIONS[pathLabel]
+  if (pathKeys) {
+    return pathKeys.map(formatGenomeLabel)
+  }
+
   return Object.entries(genome)
+    .filter(([key]) => key !== 'loneliness' || genome.loneliness > 80)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 2)
     .map(([key]) => formatGenomeLabel(key))
@@ -46,8 +59,11 @@ export default function App() {
   const [error, setError] = useState(initialState.error)
 
   const whyItMatches = useMemo(
-    () => (parsedMood?.moodGenome ? getWhyItMatches(parsedMood.moodGenome) : []),
-    [parsedMood],
+    () =>
+      parsedMood?.moodGenome && selectedPath
+        ? getWhyItMatches(parsedMood.moodGenome, selectedPath.label)
+        : [],
+    [parsedMood, selectedPath],
   )
 
   const trackScores = useMemo(() => {

@@ -1,55 +1,36 @@
 function buildFullPrompt(moodText) {
-  return `You are a music mood analyzer. Analyze this mood and return ONLY a JSON object, no other text.
+  const artistMap = `
+HINDI/BOLLYWOOD feel good: Badshah, Diljit Dosanjh
+HINDI/BOLLYWOOD sad: Arijit Singh, Atif Aslam
+HINDI/BOLLYWOOD romantic: Arijit Singh, Jubin Nautiyal
+HINDI/BOLLYWOOD nostalgic: Kumar Sanu, Udit Narayan
+TAMIL feel good: Anirudh Ravichandran
+TAMIL sad/emotional: AR Rahman, Ilaiyaraaja
+TAMIL romantic: Sid Sriram, AR Rahman
+ENGLISH sad: Lewis Capaldi, Olivia Rodrigo, Billie Eilish
+ENGLISH happy: Bruno Mars, Harry Styles, Pharrell Williams
+ENGLISH chill/indie: Bon Iver, Phoebe Bridgers, Arctic Monkeys
+ENGLISH late night: The Weeknd, Frank Ocean, Billie Eilish
+ENGLISH romantic: Ed Sheeran, John Legend, Taylor Swift
+ENGLISH energetic: Eminem, The Killers, Imagine Dragons
+JAZZ: Miles Davis, Norah Jones
+CLASSICAL/PIANO: Ludovico Einaudi, Yiruma, Hans Zimmer
+LOFI: lofi hip hop study beats`
 
-Mood: "${moodText}"
+  return `You are a music expert. Analyze this mood: "${moodText}"
 
-Return this exact JSON structure:
-{
-  "currentState": "2-3 word label",
-  "moodGenome": {
-    "nostalgia": 50,
-    "loneliness": 50,
-    "hope": 50,
-    "wonder": 50,
-    "confidence": 50,
-    "energy": 50,
-    "warmth": 50,
-    "focus": 50
-  },
-  "journeyPaths": [
-    {
-      "id": "1",
-      "label": "Sit With It",
-      "description": "One sentence in second person.",
-      "searchQuery": "genre mood artist style keywords for music search"
-    },
-    {
-      "id": "2",
-      "label": "Recover",
-      "description": "One sentence in second person.",
-      "searchQuery": "genre mood artist style keywords for music search"
-    },
-    {
-      "id": "3",
-      "label": "Reframe",
-      "description": "One sentence in second person.",
-      "searchQuery": "genre mood artist style keywords for music search"
-    },
-    {
-      "id": "4",
-      "label": "Escape",
-      "description": "One sentence in second person.",
-      "searchQuery": "genre mood artist style keywords for music search"
-    }
-  ],
-  "moodSummary": "One evocative sentence under 12 words.",
-  "wavelengthScore": 85
-}
+Use this artist reference: ${artistMap}
+
+Return ONLY this JSON with no extra text:
+{"currentState":"2-3 words","moodGenome":{"nostalgia":50,"loneliness":30,"hope":60,"wonder":40,"confidence":50,"energy":55,"warmth":60,"focus":45},"journeyPaths":[{"id":"1","label":"Sit With It","description":"Stay in this feeling.","searchQuery":"artist name"},{"id":"2","label":"Recover","description":"Gently lift yourself up.","searchQuery":"artist name"},{"id":"3","label":"Reframe","description":"See it differently.","searchQuery":"artist name"},{"id":"4","label":"Escape","description":"Go somewhere else entirely.","searchQuery":"artist name"}],"moodSummary":"One sentence under 12 words.","wavelengthScore":82}
 
 Rules:
-- Replace all values with ones matching the mood
-- searchQuery must be very short, 2-3 words maximum. Use simple terms like an artist name, a genre, or a mood word. Examples: 'Arijit Singh', 'Bollywood sad', 'Hindi romantic', 'lo-fi chill', 'indie folk melancholic'. Do NOT combine more than 3 words. Simple queries return better results.
-- Return ONLY the JSON, no explanation, no markdown`
+1. Replace all values with ones matching the mood
+2. Each searchQuery must be a real artist name from the reference list above, matched to that path's emotional destination
+3. If user mentions a specific artist, use that artist in at least one searchQuery
+4. All 4 searchQuery values must be different artists
+5. loneliness score should only be high if the mood is actually about loneliness
+6. Return ONLY valid JSON, nothing else`
 }
 
 function stripMarkdownFences(text) {
