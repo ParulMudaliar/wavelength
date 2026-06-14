@@ -10,7 +10,6 @@ export async function searchTracksForMood(query, limit) {
   const data = await response.json()
 
   return data.data
-    .filter((track) => track.preview)
     .slice(0, limit)
     .map((track) => ({
       id: track.id,

@@ -48,8 +48,7 @@ Return this exact JSON structure:
 
 Rules:
 - Replace all values with ones matching the mood
-- searchQuery must be 4-6 words of music genre, mood, or artist style that would find real songs
-- If mood mentions Hindi, Bollywood, or Indian music, use terms like "Bollywood romantic Hindi Arijit Singh" in searchQuery
+- searchQuery must be very short, 2-3 words maximum. Use simple terms like an artist name, a genre, or a mood word. Examples: 'Arijit Singh', 'Bollywood sad', 'Hindi romantic', 'lo-fi chill', 'indie folk melancholic'. Do NOT combine more than 3 words. Simple queries return better results.
 - Return ONLY the JSON, no explanation, no markdown`
 }
 

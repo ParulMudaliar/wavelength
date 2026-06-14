@@ -23,8 +23,11 @@ export default function TrackCard({
   const artistName = track.artists?.map((a) => a.name).join(', ') ?? ''
   const albumName = track.album?.name ?? ''
   const albumArt = track.album?.images?.[0]?.url
+  const hasPreview = Boolean(track.preview_url)
 
   useEffect(() => {
+    if (!hasPreview) return
+
     audioRef.current = new Audio(track.preview_url)
     const audio = audioRef.current
 
@@ -37,7 +40,7 @@ export default function TrackCard({
         activeAudio = null
       }
     }
-  }, [track.preview_url])
+  }, [track.preview_url, hasPreview])
 
   function handlePlayClick() {
     const audio = audioRef.current
@@ -163,6 +166,11 @@ export default function TrackCard({
           padding: 0;
           transition: transform 0.15s ease;
         }
+        .track-card__preview-unavailable {
+          margin-top: 8px;
+          font-size: 0.7rem;
+          color: #b3b3b3;
+        }
         .track-card__play:hover {
           transform: scale(1.05);
         }
@@ -193,6 +201,10 @@ export default function TrackCard({
           ))}
         </div>
 
+        {!hasPreview && (
+          <p className="track-card__preview-unavailable">Preview unavailable</p>
+        )}
+
         <a
           className="track-card__spotify-link"
           href={track.external_urls?.spotify}
@@ -209,7 +221,7 @@ export default function TrackCard({
         <div className="track-card__score-label">match</div>
       </div>
 
-      {track.preview_url && (
+      {hasPreview ? (
         <button
           type="button"
           className="track-card__play"
@@ -227,7 +239,7 @@ export default function TrackCard({
             </svg>
           )}
         </button>
-      )}
+      ) : null}
     </div>
   )
 }
