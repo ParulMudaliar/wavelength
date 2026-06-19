@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
-let activeAudio = null
-
 function pauseAllPageAudio() {
-  document.querySelectorAll('audio').forEach((el) => el.pause())
-  if (activeAudio) {
-    activeAudio.pause()
-  }
+  document.querySelectorAll('audio').forEach((el) => {
+    el.pause()
+    el.currentTime = 0
+  })
 }
 
 export default function TrackCard({
@@ -36,13 +34,26 @@ export default function TrackCard({
     return () => {
       audio.pause()
       audio.currentTime = 0
-      if (activeAudio === audio) {
-        activeAudio = null
-      }
     }
   }, [track.preview_url, hasPreview])
 
-  function handlePlayClick() {
+  useEffect(() => {
+    function handleTrackPlaying(event) {
+      if (event.detail !== track.id) {
+        const audio = audioRef.current
+        if (audio) {
+          audio.pause()
+          audio.currentTime = 0
+        }
+        setPlaying(false)
+      }
+    }
+
+    document.addEventListener('trackPlaying', handleTrackPlaying)
+    return () => document.removeEventListener('trackPlaying', handleTrackPlaying)
+  }, [track.id])
+
+  function togglePlay() {
     const audio = audioRef.current
     if (!audio) return
 
@@ -58,8 +69,8 @@ export default function TrackCard({
     }
 
     pauseAllPageAudio()
+    document.dispatchEvent(new CustomEvent('trackPlaying', { detail: track.id }))
     audio.play()
-    activeAudio = audio
     setPlaying(true)
   }
 
@@ -233,7 +244,7 @@ export default function TrackCard({
         <button
           type="button"
           className="track-card__play"
-          onClick={handlePlayClick}
+          onClick={togglePlay}
           aria-label={playing ? 'Pause preview' : 'Play preview'}
         >
           {playing ? (
