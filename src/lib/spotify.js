@@ -1,7 +1,7 @@
 export async function searchTracksForMood(query, limit) {
-  const url = `https://cors-anywhere.herokuapp.com/https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=${limit}`
-
-  const response = await fetch(url)
+  const response = await fetch(
+    `/api/deezer-search?q=${encodeURIComponent(query)}&limit=${limit}`,
+  )
 
   if (!response.ok) {
     throw new Error(`Deezer search failed: ${response.status}`)
