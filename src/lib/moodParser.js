@@ -60,5 +60,13 @@ export async function parseMood(moodText) {
 
   const data = await response.json()
   const content = data.choices[0].message.content
-  return JSON.parse(stripMarkdownFences(content))
+  const rawContent = stripMarkdownFences(content)
+  const cleanedContent = rawContent.replace(/,(\s*[]}])/g, '$1')
+
+  try {
+    return JSON.parse(cleanedContent)
+  } catch {
+    console.error('Failed to parse AI response:', rawContent)
+    throw new Error('AI response was malformed, please try again.')
+  }
 }
